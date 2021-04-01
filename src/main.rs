@@ -28,7 +28,7 @@ impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Error::Encode(u) => write!(f, "unable to encode value: {:?}", u),
-            Error::Decode(code) => write!(f, "unable to decode sequenche: {:?}", code),
+            Error::Decode(code) => write!(f, "unable to decode sequence: {:?}", code),
         }
     }
 }
