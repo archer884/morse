@@ -1,4 +1,4 @@
-use std::{fmt::Display, ops::RangeInclusive};
+use std::{fmt::Display, ops::RangeInclusive, process};
 
 use clap::Clap;
 use hashbrown::HashMap;
@@ -68,6 +68,7 @@ fn main() {
     let opts = Opts::parse();
     if let Err(e) = run(&opts) {
         eprintln!("{}", e);
+        process::exit(1);
     }
 }
 
