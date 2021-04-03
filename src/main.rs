@@ -96,7 +96,7 @@ fn run(opts: &Opts) -> Result<()> {
 }
 
 fn encode_message(message: &str) -> Result<String> {
-    let mut buf = String::new();
+    let mut buf = String::with_capacity(message.len() * 4);
     let mut bytes = message.bytes();
 
     if let Some(u) = bytes.next() {
