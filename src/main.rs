@@ -1,4 +1,9 @@
-use std::{fmt::Display, ops::RangeInclusive, process};
+use std::{
+    fmt::Display,
+    io::{self, Read},
+    ops::RangeInclusive,
+    process,
+};
 
 use clap::Clap;
 use hashbrown::HashMap;
@@ -14,14 +19,15 @@ static CODE: &[&str] = &[
 
 #[derive(Clap, Clone)]
 enum Opts {
-    Encode { message: String },
-    Decode { message: String },
+    Encode,
+    Decode,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 enum Error {
     Encode(char),
     Decode(String),
+    Io(io::Error),
 }
 
 impl Display for Error {
@@ -29,6 +35,7 @@ impl Display for Error {
         match self {
             Error::Encode(u) => write!(f, "unable to encode value: {:?}", u),
             Error::Decode(code) => write!(f, "unable to decode sequence: {:?}", code),
+            Error::Io(e) => e.fmt(f),
         }
     }
 }
@@ -41,6 +48,8 @@ struct CharacterDecoder {
 
 impl CharacterDecoder {
     fn new() -> Self {
+        // Looking back, I can't for the life of me figure
+        // why I did this in two iterations.
         let letters = &CODE[..26];
         let letters = letters
             .iter()
@@ -73,22 +82,26 @@ fn main() {
 }
 
 fn run(opts: &Opts) -> Result<()> {
+    let mut buf = String::new();
+    let message = io::stdin()
+        .read_to_string(&mut buf)
+        .map(|_| buf)
+        .map_err(Error::Io)?;
+
     match opts {
-        Opts::Encode { message } => {
+        Opts::Encode => {
             let message: String = message
                 .trim()
                 .bytes()
                 .filter(|&u| u == b' ' || u.is_ascii_alphanumeric())
                 .map(|u| u as char)
                 .collect();
-            let encoded = encode_message(&message)?;
-            println!("{}", encoded);
+            println!("{}", encode_message(&message)?);
         }
 
-        Opts::Decode { message } => {
+        Opts::Decode => {
             let character_decoder = CharacterDecoder::new();
-            let decoded = decode_message(message.trim(), &character_decoder)?;
-            println!("{}", decoded);
+            println!("{}", decode_message(message.trim(), &character_decoder)?);
         }
     }
 
@@ -150,13 +163,11 @@ fn decode_word_into(
     let mut characters = word.split_whitespace();
 
     if let Some(character) = characters.next() {
-        let u = character_decoder.decode(character)?;
-        buf.push(u);
+        buf.push(character_decoder.decode(character)?);
     }
 
     for character in characters {
-        let u = character_decoder.decode(character)?;
-        buf.push(u);
+        buf.push(character_decoder.decode(character)?);
     }
 
     Ok(())
