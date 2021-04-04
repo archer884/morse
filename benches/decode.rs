@@ -210,7 +210,7 @@ fn decode_character(character: &str) -> Result<u8> {
 #[inline]
 fn uncorrected_offset(character: &str) -> i32 {
     let mut offset = 0;
-    let mut increment = 32;
+    let mut increment = 1 << 5;
 
     character.bytes().for_each(|u| {
         match u {
@@ -218,7 +218,7 @@ fn uncorrected_offset(character: &str) -> i32 {
             b'-' => offset -= increment,
             _ => (),
         }
-        increment /= 2;
+        increment >>= 1;
     });
 
     offset
