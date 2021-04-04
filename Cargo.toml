@@ -8,3 +8,11 @@ edition = "2018"
 
 [dependencies]
 clap = { git = "https://github.com/clap-rs/clap.git" }
+
+[dev-dependencies]
+criterion = { version = "0.3", features = ["html_reports"] }
+hashbrown = "0.11.2"
+
+[[bench]]
+name = "decode"
+harness = false
