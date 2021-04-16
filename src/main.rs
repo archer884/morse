@@ -19,101 +19,43 @@ mod data {
     ];
 
     pub static DECODING_ARRAY: &[Option<u8>] = &[
-        Some(b'0'),
         None,
-        None,
-        None,
-        Some(b'9'),
-        None,
-        Some(b'O'),
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(b'8'),
-        None,
-        Some(b'M'),
-        None,
-        None,
-        None,
-        Some(b'Q'),
-        None,
-        None,
-        None,
-        Some(b'G'),
-        None,
-        None,
-        None,
-        Some(b'Z'),
-        None,
-        Some(b'7'),
-        None,
+        Some(b'E'),
         Some(b'T'),
-        None,
-        None,
-        None,
-        Some(b'Y'),
-        None,
-        None,
-        None,
-        Some(b'K'),
-        None,
-        None,
-        None,
-        Some(b'C'),
-        None,
-        None,
-        None,
-        Some(b'N'),
-        None,
-        None,
-        None,
-        Some(b'X'),
-        None,
-        None,
-        None,
-        Some(b'D'),
-        None,
-        None,
-        None,
-        Some(b'B'),
-        None,
-        Some(b'6'),
-        None,
-        None,
-        None,
-        Some(b'1'),
-        None,
-        Some(b'J'),
-        None,
-        None,
-        None,
-        Some(b'W'),
-        None,
-        None,
-        None,
-        Some(b'P'),
-        None,
-        None,
-        None,
+        Some(b'I'),
         Some(b'A'),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
+        Some(b'N'),
+        Some(b'M'),
+        Some(b'S'),
+        Some(b'U'),
         Some(b'R'),
-        None,
-        None,
+        Some(b'W'),
+        Some(b'D'),
+        Some(b'K'),
+        Some(b'G'),
+        Some(b'O'),
+        Some(b'H'),
+        Some(b'V'),
+        Some(b'F'),
         None,
         Some(b'L'),
         None,
+        Some(b'P'),
+        Some(b'J'),
+        Some(b'B'),
+        Some(b'X'),
+        Some(b'C'),
+        Some(b'Y'),
+        Some(b'Z'),
+        Some(b'Q'),
         None,
         None,
-        Some(b'E'),
+        Some(b'5'),
+        Some(b'4'),
+        None,
+        Some(b'3'),
+        None,
+        None,
         None,
         Some(b'2'),
         None,
@@ -121,29 +63,25 @@ mod data {
         None,
         None,
         None,
-        Some(b'U'),
+        None,
+        None,
+        Some(b'1'),
+        Some(b'6'),
         None,
         None,
         None,
-        Some(b'F'),
         None,
         None,
         None,
-        Some(b'I'),
         None,
-        Some(b'3'),
-        None,
-        Some(b'V'),
+        Some(b'7'),
         None,
         None,
         None,
-        Some(b'S'),
+        Some(b'8'),
         None,
-        Some(b'4'),
-        None,
-        Some(b'H'),
-        None,
-        Some(b'5'),
+        Some(b'9'),
+        Some(b'0'),
     ];
 }
 
@@ -271,10 +209,7 @@ fn decode_word_into(word: &str, buf: &mut String) -> Result<()> {
 
 #[inline]
 fn decode_character(character: &str) -> Result<u8> {
-    /// Correction factor to raise minimum index to zero.
-    const MAGIC_NUMBER: i32 = 62;
-
-    let idx = uncorrected_offset(character) + MAGIC_NUMBER;
+    let idx = character_index(character);
     data::DECODING_ARRAY
         .get(idx as usize)
         .copied()
@@ -283,20 +218,12 @@ fn decode_character(character: &str) -> Result<u8> {
 }
 
 #[inline]
-fn uncorrected_offset(character: &str) -> i32 {
-    let mut offset = 0;
-    let mut increment = 1 << 5;
-
-    character.bytes().for_each(|u| {
-        match u {
-            b'.' => offset += increment,
-            b'-' => offset -= increment,
-            _ => (),
-        }
-        increment >>= 1;
-    });
-
-    offset
+fn character_index(character: &str) -> i32 {
+    character.bytes().fold(0, |idx, u| match u {
+        b'.' => idx * 2 + 1,
+        b'-' => idx * 2 + 2,
+        _ => idx,
+    })
 }
 
 #[cfg(test)]
